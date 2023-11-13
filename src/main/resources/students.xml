@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<students>
+    <student>
+        <id>1</id>
+        <name>Боброва Марианна Михайловна</name>
+    </student>
+    <student>
+        <id>2</id>
+        <name>Панкова Анна Егоровна</name>
+    </student>
+    <student>
+        <id>3</id>
+        <name>Жилина Ева Данииловна</name>
+    </student>
+    <student>
+        <id>4</id>
+        <name>Уткин Дмитрий Романович</name>
+    </student>
+    <student>
+        <id>5</id>
+        <name>Лукина Ульяна Артемьевна</name>
+    </student>
+</students>

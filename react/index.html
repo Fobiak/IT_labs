@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Маршруты в React</title>
+    <link rel="stylesheet" type="text/css" href="main.css">
+
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/history@5/umd/history.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-router@6.3.0/umd/react-router.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-router-dom@6.3.0/umd/react-router-dom.production.min.js" crossorigin></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+</head>
+<body>
+
+<div id="app"></div>
+
+<script type="text/babel">
+    const Router = ReactRouterDOM.HashRouter;
+    const Route = ReactRouterDOM.Route;
+    const Routes = ReactRouterDOM.Routes;
+    const Link = ReactRouterDOM.Link;
+
+	function OnLoadingData(Component) {
+        return function LoadingStudentsData({isLoading, isError, ...props}) {
+            if (isError) return <p>Ошибка загрузки данных</p>;
+            if (!isLoading) return <Component {...props} />;
+            else return (
+                <div>
+                    <h1>Подождите, данные загружаются</h1>
+                </div>
+            )
+        }
+    }
+
+	function StudentList({students}) {
+        if (!students || students.length === 0) return <p>Нет данных</p>;
+        const navigate = ReactRouterDOM.useNavigate();
+
+        function deleteStudent(studentId) {
+            axios
+                .delete('http://localhost:8080/students/' + studentId, {mode: 'no-cors'})
+                .then(response => {
+                    console.log("Student deleted");
+                    navigate(0);
+                })
+                .catch(error => {
+                    alert(error);
+                });
+        }
+
+		return (
+            <>
+                <div className="table">
+                    <div className="caption"><h1>Список студентов</h1></div>
+                    <div className="header">
+                        <div className="header-item h-1">Номер студента</div>
+                        <div className="header-item h-1">Имя студента</div>
+                    </div>
+                    {
+                        students.map(student =>
+                        <div className="row" key={student.id}>
+                            <div className="row-item r-1">{student.id}</div>
+                            <div className="row-item r-2">{student.name}</div>
+								<Link to={"/editStudent/" + student.id}>
+									<button className="button">Редактировать</button>
+								</Link>
+									<button className="button" onClick={() => deleteStudent(student.id)}>Удалить</button>
+                        </div>
+                    )}
+						<Link to="/addStudent">
+							<button className="button">Добавить</button>
+						</Link>
+                </div>
+            </>
+        );
+    }
+
+	function LoadStudentList() {
+        const OnLoadingDataComponent = OnLoadingData(StudentList)
+        const [studentsState, setStudentsState] = React.useState({
+            loading: false,
+            students: null,
+            error: false,
+        })
+
+        React.useEffect(() => {
+            setStudentsState({loading: true})
+				axios
+					.get('http://localhost:8080/students', {mode: 'no-cors'})
+					.then(response => {
+						let allStudents = response.data
+						setStudentsState({
+							loading: false,
+							students: allStudents,
+							error: false,
+						})
+					})
+					.catch(error => {
+						setStudentsState({
+							loading: false,
+							students: null,
+							error: true,
+						})
+					})
+			}, [])
+		return <OnLoadingDataComponent isLoading={studentsState.loading} isError={studentsState.error}
+										   students={studentsState.students}/>
+    }
+
+	function EditStudent(props) {
+        if (!props.student) return (<div>Нет данных</div>)
+        let [student, setStudent] = React.useState(props.student)
+        const navigate = ReactRouterDOM.useNavigate();
+        function handleChange(inputEvent, field) {
+            setStudent(prevState => ({ ...prevState, [field]: inputEvent.target.value}))
+        }
+
+        function changeStudent(event, id) {
+            event.preventDefault();
+            axios({
+                method: 'PUT',
+                url: 'http://localhost:8080/students/' + id,
+                data: student.name,
+                headers: {'Content-Type': 'application/json; charset=utf-8'}
+            })
+                .then(response => {console.log("student updater");
+                    navigate("/")
+                })
+                .catch(error => { alert(error);})
+        }
+        return (
+            <>
+                <div className="add-form">
+                    <div className="title caption">
+                        <h1>Форма редактирования</h1>
+                    </div>
+                    <section>
+                        <input type="text" placeholder="Имя студента" value={student.name}
+                               onChange={event => handleChange(event, "name")}/>
+                    </section>
+                </div>
+                <div className="button-container">
+                    <div className="buttons">
+                        <button className="button" onClick={event => changeStudent(event, student.id)}>Сохранить</button>
+                        <Link to="/">
+                            <button className="button">Отмена</button>
+                        </Link>
+                    </div>
+                </div>
+            </>
+        );
+    }
+
+	function LoadStudent() {
+        const OnLoadingDataComponent = OnLoadingData(EditStudent)
+        const [studentState, setStudentState] = React.useState({
+            loading: false,
+            student: null,
+        })
+
+        let params = ReactRouterDOM.useParams();
+        let studentId = params.id;
+
+        React.useEffect(() => {
+            setStudentState({loading: true})
+            axios
+                .get('http://localhost:8080/students/' + studentId, {mode: 'no-cors'})
+                .then(response => {
+                    setStudentState({
+                        loading: false,
+                        student: response.data,
+                        error: false,
+                    })
+                })
+                .catch(error => {
+                    setStudentState({
+                        loading: false,
+                        student: null,
+                        error: true,
+                    })
+                })
+        }, [])
+        return <OnLoadingDataComponent isLoading={studentState.loading} isError={studentState.error}
+                                       student={studentState.student}/>
+    }
+
+	function AddStudent() {
+        let [student, setStudent] = React.useState({ id: '', name: ''})
+        const navigate = ReactRouterDOM.useNavigate();
+        function handleChange(inputEvent, field) {
+            setStudent(prevState => ({...prevState, [field]: inputEvent.target.value}))
+        }
+        function addStudent(event) {
+            event.preventDefault();
+            axios({
+                method: 'POST',
+                url: 'http://localhost:8080/students/',
+                data: JSON.stringify(student),
+                headers: {'Content-Type': 'application/json; charset=utf-8'}
+            })
+                .then(response => {
+                    console.log("student added");
+                    navigate("/")
+                })
+                .catch(error => {
+                    alert(error);
+                })
+        }
+        return (
+            <>
+                <div className="add-form">
+                    <div className="title caption">
+                        <h1>Форма добавления студента</h1>
+                    </div>
+                    <section>
+                        <div>
+                            <div>
+                                <input type="text" placeholder="Номер студента" value={student.id || ''}
+                                       onChange={event => handleChange(event, "id")}/>
+                            </div>
+                            <div>
+                                <input type="text" placeholder="Имя студента" value={student.name || ''}
+                                       onChange={event => handleChange(event, "name")}/>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                <div className="button-container">
+                    <div className="buttons">
+                        <div>
+                            <button className="button" onClick={event => addStudent(event)}>Сохранить</button>
+                            <Link to="/">
+                                <button className="button">Отмена</button>
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+            </>
+        );
+    }
+
+	ReactDOM.createRoot(
+        document.getElementById("app")
+    )
+
+        .render(
+            <Router>
+                <Routes>
+                    <Route path="/" element={<LoadStudentList />} />
+                    <Route path="/addStudent" element={<AddStudent />} />
+                    <Route path="/editStudent/:id" element={<LoadStudent />} />
+                </Routes>
+            </Router>
+        );
+
+</script>
+
+</body>
+</html>

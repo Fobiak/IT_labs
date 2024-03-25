@@ -9,7 +9,7 @@ import ru.usatu.students.service.StudentService;
 
 import java.util.List;
 
-@CrossOrigin
+@CrossOrigin //позволяет предоставить веб-страницам доступ к ресурсам другого домена
 @RestController //объявляет класс как контроллер RestApi - обрабатывать http запросы и возвращать рез-ты в формате json
 @RequestMapping("/students") //Эта аннотация определяет базовый URL-путь для обработчиков запросов внутри этого контроллера.
 //например, /students, /students/{id}
@@ -18,9 +18,10 @@ public class StudentController {
     private StudentService studentService;
 
     public StudentController(StudentService studentService) { this.studentService = studentService; } //класс зависит от интерфейса StudentService
-
+    //технология современных браузеров, которая позволяет предоставить веб-страницам доступ к ресурсам другого домена.
     // Обработчик HTTP-запроса GET для получения списка студентов
     @GetMapping
+    @Operation(summary = "test")
     public @ResponseBody //в Spring Framework указывает, что возвращаемое значение метода контроллера должно быть преобразовано в тело ответа HTTP
     List<Student> getStudents() throws Exception {return studentService.getStudents(); } //List<Student> getStudents() { return studentService.getStudents(); }
 

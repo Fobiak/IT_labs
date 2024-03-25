@@ -15,15 +15,15 @@
     </div>
     <script>
     const studentsComponent = {
-		template: `<div v-if="loading">Loading...</div>
-				   <div v-else>
+		template: `<div v-if="loading">Loading...</div> //Когда выражение истинно, элемент рендерится; в противном случае он не появляется в DOM
+				   <div v-else> //Используется вместе с v-if и представляет собой альтернативный блок, который будет отображен, если условие v-if ложно.
 						<div class="table">
 							<div class="caption"><h1>Список студентов</h1></div>
 							<div class="header">
 								<div class="header-item h-1">Номер студента</div>
 								<div class="header-item h-1">Фамилия Имя Отчество</div>
 							</div>
-							<div class="row" v-for="student in students">
+							<div class="row" v-for="student in students"> //Используется для итерации по массивам или объектам и создания элементов для каждого элемента.
 								<div class="row-item r-1">
 								        {{student.id}}
 								</div>
@@ -32,7 +32,7 @@
 								</div>
 							</div>
 							<div>
-								<button class="button" v-on:click="addStudent">Добавить</button>
+								<button class="button" v-on:click="addStudent">Добавить</button> //Привязанный код или функция выполняется в момент срабатывания события.
 								<button class="button" v-on:click="deleteStudent">Удалить</button>
 								<button class="button" v-on:click="editStudent">Редактировать</button>
 							</div>
@@ -55,9 +55,9 @@
 			    this.$router.push('/editStudent');
 			},
 		},
-		mounted() {
+		mounted() { //позволяют получать доступ к компоненту до и после первой отрисовки
 			axios
-				.get('http://localhost:8080/students', {mode: 'no-cors'})
+				.get('http://localhost:8080/students', {mode: 'no-cors'}) //"no-cors" – разрешены только безопасные запросы из разных источников
 				.then(response => (this.students = response.data))
 				.finally(() => this.loading = false);
 		}
@@ -70,7 +70,7 @@
 						<section>
 							<div>
 								<div>
-									<input type="text" v-model="student.id" placeholder="Номер студента">
+									<input type="text" v-model="student.id" placeholder="Номер студента"> //можно добавить данные студента с последующим сохранением на стороне сервера.
 								</div>
 								<div>
 									<input type="text" v-model="student.name" placeholder="Имя студента">
@@ -218,13 +218,13 @@
         ];
 
         const router = new VueRouter.createRouter({
-            history: VueRouter.createWebHashHistory(),
-            routes
+            history: VueRouter.createWebHashHistory(), //Параметр записывает каждый URL-адрес, который был передан в адресную строку, активируя кнопки браузера вперед и назад;
+            routes //определяет используемый массив маршрутов.
         });
 
-        const app = Vue.createApp({});
-        app.use(router);
-        app.mount('#app');
+        const app = Vue.createApp({}); //создание нового экземпляра спомощью функции CREATEAPP
+        app.use(router); //плагин для построения системы маршрутизации
+        app.mount('#app'); //монтирование приложения к dom элементам
     </script>
 </body>
 </html>
